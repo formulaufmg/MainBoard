@@ -28,13 +28,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: Main\ board\ 05\ 11\ -\ \ Teste\ lowpass.elf
+all: Main\ board\ 05\ 11.elf
 
 # Tool invocations
-Main\ board\ 05\ 11\ -\ \ Teste\ lowpass.elf: $(OBJS) $(USER_OBJS) ../STM32F103C8Tx_FLASH.ld
+Main\ board\ 05\ 11.elf: $(OBJS) $(USER_OBJS) ../STM32F103C8Tx_FLASH.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -specs=nosys.specs -specs=nano.specs -u _printf_float -T"../STM32F103C8Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Main board 05 11 -  Teste lowpass.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -specs=nosys.specs -specs=nano.specs -u _printf_float -T"../STM32F103C8Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Main board 05 11.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -46,8 +46,8 @@ clean:
 
 post-build:
 	-@echo 'Generating hex and Printing size information:'
-	arm-none-eabi-objcopy -O ihex "Main board 05 11 -  Teste lowpass.elf" "Main board 05 11 -  Teste lowpass.hex"
-	arm-none-eabi-size "Main board 05 11 -  Teste lowpass.elf"
+	arm-none-eabi-objcopy -O ihex "Main board 05 11.elf" "Main board 05 11.hex"
+	arm-none-eabi-size "Main board 05 11.elf"
 	-@echo ' '
 
 .PHONY: all clean dependents

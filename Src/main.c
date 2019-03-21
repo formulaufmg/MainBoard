@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -61,7 +61,7 @@ DMA_HandleTypeDef hdma_usart1_tx;
 /* Private variables ---------------------------------------------------------*/
 
 /* Para enviar como string, defina SENDNUMBER como 0. Para enviar um buffer de bytes, defina como 1*/
-#define SENDNUMBER 0
+#define SENDNUMBER 1
 
 /* Define endereços dos dados (measureID) de acordo com o protocolo FTCAN2.0*/
 #define TPS_ADDR 0x0002
@@ -92,7 +92,7 @@ char tx_buffer3[80];
 char tx_buffer4[100];
 uint8_t pack3_cnt = 0, pack2_cnt = 0, PACKNO;
 
-uint8_t buff1[15], buff2[18], buff3[13] ,buff4[28];
+uint8_t buff1[15], buff2[20], buff3[15] ,buff4[30];
 
 /*I2c acelerometro*/
 SD_MPU6050 mpu1;
@@ -438,7 +438,7 @@ static void MX_CAN_Init(void)
   hcan.Init.BS1 = CAN_BS1_5TQ;
   hcan.Init.BS2 = CAN_BS2_6TQ;
   hcan.Init.TTCM = DISABLE;
-  hcan.Init.ABOM = DISABLE;
+  hcan.Init.ABOM = ENABLE;
   hcan.Init.AWUM = DISABLE;
   hcan.Init.NART = DISABLE;
   hcan.Init.RFLM = DISABLE;
@@ -900,6 +900,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	TIMERCOUNT++;
 	SPARKC = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
 	BEACON = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8);
+	BEACON=1;
 
 	if(SENDNUMBER == 0){
 
@@ -914,6 +915,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 		/*Mensagem para interface, pacote de 50Hz so com acelerometro*/
 
+		SUSP = 0;
 		sprintf(tx_buffer, "%d %d %d %d %d %d %d %d\n", 1, a_x, a_y, a_z, SPEEDFR, SPARKC,SUSP, TIMERCOUNT);/*Mensagem para interface novo jeito, pacote de 50Hz*/
 
 			//assemblePackage(1);
@@ -934,17 +936,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY){}
 				HAL_UART_Transmit_DMA(&huart1, tx_buffer4, strlen(tx_buffer4));
 		}
-		/* Define frequencias dos pacotes 2 e 3.
-		 * Ja carrega de uma vez o buffer do pacote 2 e 4*/
-
-		sprintf(tx_buffer2, "%d %d %d %d %d %d %d %d %d %d\n", 2, OILP, FUELP, TPS, PFREIOT, PFREIOD,POSVOL, BEACON,CORRENTE, TIMERCOUNT);
-
+		/* Define frequencias dos pacotes 2 e 3*/
 
 		if(pack2_cnt == 1){
-			/* Transmissao do pacote 2. Espera UART estar liberado p/ transmitir */
+			/*Carrega o buffer do pacote 2*/
 
+
+			sprintf(tx_buffer2, "%d %d %d %d %d %d %d %d %d %d\n", 2, OILP, FUELP, TPS, PFREIOT, PFREIOD,POSVOL, BEACON,CORRENTE, TIMERCOUNT);
+
+			/* Transmissao do pacote 2. Espera UART estar liberado p/ transmitir */
 			while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY){}
 			HAL_UART_Transmit_DMA(&huart1, tx_buffer2, strlen(tx_buffer2));
+
+			/*Reseta counter do pacote 2*/
 			pack2_cnt = -1;
 			if(pack3_cnt == 19){
 
@@ -952,8 +956,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				BOMBA = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
 
 				/* Carrega de uma vez o buffer do pacote 3 */
+				TEMPPDU = 0;
 				sprintf(tx_buffer3, "%d %d %d %d %d %d %d %d %d\n", 3, ECT,  BAT, BOMBA, VENT, TEMPPDU, TEMPBREAK_1, TEMPBREAK_2, TIMERCOUNT);
-
+				//BAT = 2;
 				/* Transmissao do pacote 3. Espera UART estar liberado p/ transmitir */
 				while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY){}
 				HAL_UART_Transmit_DMA(&huart1, tx_buffer3, strlen(tx_buffer3));
@@ -977,18 +982,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 			/* Transmissao do pacote 4. Espera UART estar liberado p/ transmitir */
 			while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY){}
-			HAL_UART_Transmit_DMA(&huart1, buff4, strlen(tx_buffer4));
+			HAL_UART_Transmit_DMA(&huart1, buff4, 30);
 		}
 		/* Define frequencias dos pacotes 2 e 3.
 		 * Ja carrega de uma vez o buffer do pacote 2 e 4*/
 
-		//assemblePackage(2);
+		assemblePackage(2);
 
 		if(pack2_cnt == 1){
 			/* Transmissao do pacote 2. Espera UART estar liberado p/ transmitir */
 
 			while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY){}
-			//HAL_UART_Transmit_DMA(&huart1, buff2, strlen(tx_buffer2));
+			HAL_UART_Transmit_DMA(&huart1, buff2, 20);
 			pack2_cnt = -1;
 			if(pack3_cnt == 19){
 
@@ -996,11 +1001,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				BOMBA = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
 
 				/* Carrega de uma vez o buffer do pacote 3 */
-				//assemblePackage(3);
+				assemblePackage(3);
 
 				/* Transmissao do pacote 3. Espera UART estar liberado p/ transmitir */
 				while (HAL_UART_GetState(&huart1) != HAL_UART_STATE_READY){}
-				//HAL_UART_Transmit_DMA(&huart1, buff3, strlen(tx_buffer3));
+				HAL_UART_Transmit_DMA(&huart1, buff3, 15);
 				pack3_cnt = -1;
 			}
 		}
@@ -1054,7 +1059,8 @@ void assemblePackage(uint8_t n){
 		buff2[15] = CORRENTE;
 		buff2[16] = TIMERCOUNT>>8;
 		buff2[17] = TIMERCOUNT;
-		buff2[18] = '\n';
+		buff2[18] = 9;
+		buff2[19] = '\n';
 			break;
 	case 3:
 		buff3[0]=3;
@@ -1070,7 +1076,8 @@ void assemblePackage(uint8_t n){
 		buff3[10]=TEMPBREAK_2 ;
 		buff3[11] = TIMERCOUNT>>8;
 		buff3[12] = TIMERCOUNT;
-		buff3[13] = '\n';
+		buff3[13] = 9;
+		buff3[14] = '\n';
 			break;
 	case 4:
 		buff4[0] = 4;
@@ -1101,7 +1108,8 @@ void assemblePackage(uint8_t n){
  	    buff4[25] = EXT_DATA[7];
 		buff4[26] = TIMERCOUNT>>8;
 		buff4[27] = TIMERCOUNT;
-		buff4[28] = '\n';
+		buff4[28] = 9;
+		buff4[29] = '\n';
 
 			break;
 	default:

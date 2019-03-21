@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/befto/Dropbox/Formula/CAN/Main board 05 11 -  Teste lowpass/Inc
+HeaderPath=C:/Users/Mayumi/Documents/Main board 05 11 -  Teste lowpass/Inc
 HeaderFiles=stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;
-SourcePath=C:/Users/befto/Dropbox/Formula/CAN/Main board 05 11 -  Teste lowpass/Src
+SourcePath=C:/Users/Mayumi/Documents/Main board 05 11 -  Teste lowpass/Src
 SourceFiles=stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
