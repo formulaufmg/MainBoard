@@ -274,14 +274,12 @@ int main(void)
   {
 	  /* Pisca LED para sinalizar que há um programa rodando */
 	  //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-
 	//  result = SD_MPU6050_Init (&hi2c2, &mpu1, SD_MPU6050_Device_0,SD_MPU6050_Accelerometer_2G, SD_MPU6050_Gyroscope_250s);
 	//  HAL_Delay(100);
 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
 
 	 	 //SD_MPU6050_ReadAccelerometer(&hi2c2,&mpu1);
 	 //	 a_x = mpu1.Accelerometer_X;
@@ -649,7 +647,7 @@ void getMeasure(uint8_t address, uint16_t value){
 		break;
 	case	DRSFRPM:
 		RPM = value;
-	break;
+		break;
 	default:
 		break;
 	}
